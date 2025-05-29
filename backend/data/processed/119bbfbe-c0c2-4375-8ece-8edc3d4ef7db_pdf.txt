@@ -1,0 +1,406 @@
+--- Page 1 ---
+An Impossibility Theorem for Clustering
+Jon Kleinberg
+Department of Computer Science
+Cornell University
+Ithaca NY 14853
+Abstract
+Although the study of clustering is centered around an intuitively
+compelling goal, it has been very di(cid:14)cult to develop a uni(cid:12)ed
+framework for reasoning about it at a technical level, and pro-
+foundly diverse approaches to clustering abound in the research
+community. Here we suggest a formal perspective on the di(cid:14)culty
+in (cid:12)nding such a uni(cid:12)cation, in the form of an impossibility theo-
+rem: for a set of three simple properties, we show that there is no
+clustering function satisfying all three. Relaxations of these prop-
+erties expose some of the interesting (and unavoidable) trade-o(cid:11)s
+atworkinwell-studiedclusteringtechniquessuchassingle-linkage,
+sum-of-pairs, k-means, and k-median.
+1 Introduction
+Clustering is a notion that arisesnaturally in many (cid:12)elds; wheneverone has a het-
+erogeneousset of objects, it is natural to seek methods for groupingthem together
+based on an underlying measure of similarity. A standard approach is to represent
+the collection of objectsas aset of abstractpoints, and de(cid:12)ne distances among the
+points to represent similarities | the closer the points, the more similar they are.
+Thus, clustering is centered around an intuitively compelling but vaguely de(cid:12)ned
+goal: givenanunderlyingsetofpoints,partitionthemintoacollectionofclustersso
+that points in the same cluster are close together, while points in di(cid:11)erent clusters
+are far apart.
+Thestudyofclusteringisuni(cid:12)edonlyatthisverygenerallevelofdescription,how-
+ever; at the level of concretemethods and algorithms,one quicklyencountersa be-
+wilderingarrayofdi(cid:11)erentclusteringtechniques,includingagglomerative,spectral,
+information-theoretic,and centroid-based,aswell asthose arisingfromcombinato-
+rial optimization and from probabilistic generative models. These techniques are
+basedondiverseunderlyingprinciples,andtheyoftenleadtoqualitativelydi(cid:11)erent
+results. Anumberof standardtextbooks[1,4,6,9]provideoverviewsof arangeof
+the approachesthat are generally employed.
+Giventhescopeoftheissue,therehasbeenrelativelylittleworkaimedatreasoning
+about clustering independently of any particular algorithm, objective function, or
+generative data model. But it is not clear that this needs to be the case. To take
+a motivatingexample from atechnically di(cid:11)erent but methodologicallysimilarset-
+--- Page 2 ---
+ting, researchin mathematical economics has frequently formalized broad intuitive
+notions(howtofairlydivideresources,orhowtoachieveconsensusfromindividual
+preferences) in what is often termed an axiomatic framework | one enumerates a
+collectionofsimplepropertiesthatasolutionoughttosatisfy,andthenstudieshow
+these properties constrain the solutions one is able to obtain [10]. In some striking
+cases, as in Arrow’s celebrated theorem on social choice functions [2], the result is
+impossibility | there is no solution that simultaneously satis(cid:12)es a small collection
+of simple properties.
+In this paper, we develop an axiomatic framework for clustering. First, as is stan-
+dard, we de(cid:12)ne a clustering function to be any function f that takes a set S of n
+points with pairwise distances between them, and returns a partition of S. (The
+pointsin S arenotassumedtobelong toanyambientspace; the pairwise distances
+are the only data one has about them.) We then consider the e(cid:11)ect of requir-
+ing the clustering function to obey certain natural properties. Our (cid:12)rst result is
+a basic impossibility theorem: for a set of three simple properties | essentially
+scale-invariance, a richness requirement that all partitions be achievable, and a
+consistency condition on the shrinkingand stretchingof individual distances | we
+show that there is no clustering function satisfying all three. None of these prop-
+erties is redundant, in the sense that it is easy to construct clustering functions
+satisfying any two of the three. We also show, by way of contrast, that certain
+natural relaxations of this set of properties are satis(cid:12)ed by versions of well-known
+clustering functions, including those derived from single-linkage and sum-of-pairs.
+Inparticular,wefullycharacterizethesetofpossibleoutputsofaclusteringfunction
+that satis(cid:12)es the scale-invarianceand consistency properties.
+How should one interpret an impossibility result in this setting? The fact that it
+arises directly from three simple constraints suggests a technical underpinning for
+the di(cid:14)culty in unifying the initial, informal concept of \clustering." It indicates a
+set of basic trade-o(cid:11)s that are inherent in the clustering problem, and o(cid:11)ers a way
+todistinguishbetweenclusteringmethodsbasednotsimplyonoperationalgrounds,
+but on the ways in which they resolve the choices implicit in these trade-o(cid:11)s. Ex-
+ploring relaxations of the properties helps to sharpen this type of analysis further
+|providingaperspective,forexample,onthe distinctionbetweenclusteringfunc-
+tions that (cid:12)x the number of clusters a priori and those that do not; and between
+clusteringfunctionsthatbuildinafundamentallengthscaleandthosethatdonot.
+Other Axiomatic Approaches. As discussed above, the vast majority of ap-
+proaches to clustering are derived from the application of speci(cid:12)c algorithms, the
+optima of speci(cid:12)c objective functions, or the consequences of particularprobabilis-
+tic generativemodels for the data. Here we brie(cid:13)y review workseekingto examine
+properties that do not overtly impose a particular objective function or model.
+Jardine and Sibson [7] and Puzicha, Hofmann, and Buhmann [12] have considered
+axiomatic approaches to clustering, although they operate in formalisms quite dif-
+ferentfromours,andtheydonotseekimpossibilityresults. JardineandSibsonare
+concerned with hierarchical clustering, where one constructs a tree of nested clus-
+ters. They show that a hierarchical version of single-linkage is the unique function
+consistent with a collection of properties; however, this is primarily a consequence
+of the fact that one of their properties is an implicit optimization criterion that
+is uniquely optimized by single-linkage. Puzicha et al. consider properties of cost
+functionsonpartitions;theseimplicitlyde(cid:12)neclusteringfunctionsthroughthepro-
+cess of choosing a minimum-cost partition. They investigate a particular class of
+clustering functions that arises if one requires the cost function to decompose into
+a certain additive form. Recently, Kalai, Papadimitriou, Vempala, and Vetta have
+--- Page 3 ---
+alsoinvestigatedanaxiomaticframeworkforclustering[8];liketheapproachofJar-
+dine and Sibson [7], and in contrast to our work here, they formulate a collection
+of propertiesthat aresu(cid:14)cient to uniquely specify aparticularclusteringfunction.
+Axiomatic approaches have also been applied in areas related to clustering | par-
+ticularlyincollaborative(cid:12)ltering,whichharnessessimilaritiesamonguserstomake
+recommendations, and in discrete location theory, which focuses on the placement
+of\central"facilitiesamongdistributedcollectionsofindividuals. Forcollaborative
+(cid:12)ltering, Pennock et al. [11] show how results from social choice theory, including
+versionsofArrow’sImpossibilityTheorem[2],canbeappliedtocharacterizerecom-
+mendation systems satisfying collections of simple properties. In discrete location
+theory, Hansen and Roberts [5] prove an impossibility result for choosing a central
+facilitytoserveasetofdemandsonagraph;essentially,givenacertaincollectionof
+requiredproperties,theyshowthat anyfunction thatspeci(cid:12)esthe resultingfacility
+must be highly sensitive to small changes in the input.
+2 The Impossibility Theorem
+AclusteringfunctionoperatesonasetS ofn(cid:21)2pointsandthepairwisedistances
+among them. Since we wish to deal with point sets that do not necessarily belong
+toanambientspace, weidentify the points with the set S =f1;2;:::;ng. We then
+de(cid:12)ne a distance function to be any function d :S(cid:2)S !R such that for distinct
+i;j 2S,wehaved(i;j)(cid:21)0,d(i;j)=0ifandonlyifi=j,andd(i;j)=d(j;i). One
+canoptionallyrestrictattentionto distancefunctions that aremetrics byimposing
+the triangle inequality: d(i;k) (cid:20) d(i;j)+d(j;k) for all i;j;k 2 S. We will not
+require the triangle inequality in the discussion here, but the results to follow |
+both negative and positive | still hold if one does require it.
+A clustering function is a function f that takes a distance function d on S and
+returnsapartition(cid:0)ofS. Thesetsin(cid:0)willbecalleditsclusters. Wenotethat,as
+written, a clustering function is de(cid:12)ned only on point sets of a particular size (n);
+however,all the speci(cid:12)c clusteringfunctions weconsiderherewill be de(cid:12)ned forall
+values of n larger than some small base value.
+Here is a (cid:12)rst property one could require of a clustering function. If d is a distance
+function,wewrite(cid:11)(cid:1)dtodenotethedistancefunctioninwhichthedistancebetween
+i and j is (cid:11)d(i;j).
+Scale-Invariance. For any distance function d and any (cid:11) > 0,
+we have f(d)=f((cid:11)(cid:1)d).
+This is simply the requirement that the clustering function not be sensitive to
+changesintheunitsofdistancemeasurement|itshouldnothaveabuilt-in\length
+scale." A second property is that the output of the clustering function should be
+\rich" | every partition of S is a possible output. To state this more compactly,
+letRange(f)denotethe setofallpartitions(cid:0)suchthatf(d)=(cid:0)forsomedistance
+function d.
+Richness. Range(f) is equal to the set of all partitions of S.
+In other words, suppose we are given the names of the points only (i.e. the indices
+in S) but not the distances between them. Richness requires that for any desired
+partition (cid:0), it should be possible to construct a distance function d on S for which
+f(d)=(cid:0).
+--- Page 4 ---
+Finally, we discuss a Consistency property that is more subtle that the (cid:12)rst two.
+We think of a clustering function as being \consistent" if it exhibits the following
+behavior: when we shrink distances between points inside a cluster and expand
+distances between pointsin di(cid:11)erent clusters, wegetthe sameresult. Tomakethis
+precise, we introduce the following de(cid:12)nition. Let (cid:0) be a partition of S, and d and
+d0 two distance functions on S. We say that d0 is a (cid:0)-transformation of d if (a) for
+all i;j 2S belongingto the same cluster of (cid:0), we haved0(i;j)(cid:20)d(i;j); and (b) for
+all i;j 2S belonging to di(cid:11)erent clusters of (cid:0), we have d0(i;j)(cid:21)d(i;j).
+Consistency. Letdandd0 betwodistancefunctions. Iff(d)=(cid:0),
+and d0 is a (cid:0)-transformation of d, then f(d0)=(cid:0).
+Inotherwords,supposethatthe clustering(cid:0)arisesfromthe distancefunctiond. If
+wenowproduced0 byreducingdistances withinthe clustersandenlargingdistance
+between the clusters then the same clustering (cid:0) should arise from d0.
+We can now state the impossibility theorem very simply.
+Theorem 2.1 Foreach n(cid:21)2,thereisnoclusteringfunctionf thatsatis(cid:12)esScale-
+Invariance, Richness, and Consistency.
+We will prove Theorem 2.1 in the next section, as a consequence of a more general
+statement. Before doing this, we re(cid:13)ect on the relation of these properties to one
+another by showing that there exist natural clustering functions satisfying any two
+of the three properties.
+To do this, we describe the single-linkage procedure (see e.g. [6]), which in fact de-
+(cid:12)nes a family of clustering functions. Intuitively, single-linkage operates by initial-
+izingeachpointasitsowncluster,andthen repeatedlymergingthepairof clusters
+whose distance to one another (as measured from their closest points of approach)
+is minimum. More concretely, single-linkage constructs a weighted complete graph
+G whose node set is S and for which the weight on edge (i;j) is d(i;j). It then
+d
+orders the edges of G by non-decreasing weight (breaking ties lexicographically),
+d
+and adds edges one at a time until a speci(cid:12)ed stopping condition is reached. Let
+H denote the subgraph consisting of all edges that are added before the stopping
+d
+condition is reached; the connected components of H are the clusters.
+d
+Thus,bychoosingastoppingconditionforthesingle-linkageprocedure,oneobtains
+aclusteringfunction,whichmapstheinputdistancefunctiontothesetofconnected
+components that results at the end of the procedure. We now show that for any
+twoofthethreepropertiesinTheorem2.1,onecanchooseasingle-linkagestopping
+condition so that the resulting clustering function satis(cid:12)es these two properties.
+Here are the three types of stopping conditions we will consider.
+(cid:15) k-cluster stopping condition. Stop adding edges when the subgraph (cid:12)rst
+consists of k connected components. (We will only consider this condition
+to be well-de(cid:12)ned when the number of points is at least k.)
+(cid:15) distance-r stopping condition. Only add edges of weight at most r.
+(cid:15) scale-(cid:11) stopping condition. Let (cid:26)(cid:3) denote the maximum pairwise distance;
+i.e. (cid:26)(cid:3) =max d(i;j). Only add edges of weight at most (cid:11)(cid:26)(cid:3).
+i;j
+It is clear that these various stopping conditions qualitatively trade o(cid:11) certain of
+the propertiesin Theorem2.1. Thus, for example, the k-cluster stoppingcondition
+does not attempt to produce all possible partitions, while the distance-r stopping
+condition builds in a fundamental length scale, and hence is not scale-invariant.
+--- Page 5 ---
+However, by the appropriate choice of one of these stopping conditions, one can
+achieve any two of the three properties in Theorem 2.1.
+Theorem 2.2 (a) For any k (cid:21)1, and any n(cid:21)k, single-linkage with the k-cluster
+stopping condition satis(cid:12)es Scale-Invariance and Consistency.
+(b) For any positive (cid:11)<1, and any n(cid:21)3, single-linkage with the scale-(cid:11) stopping
+condition satis(cid:12)es Scale-Invariance and Richness.
+(c) For any r > 0, and any n (cid:21) 2, single-linkage with the distance-r stopping
+condition satis(cid:12)es Richness and Consistency.
+3 Antichains of Partitions
+We now state and prove a strengthening of the impossibility result. We say that
+a partition (cid:0)0 is a re(cid:12)nement of a partition (cid:0) if for every set C0 2 (cid:0)0, there is a
+set C 2 (cid:0) such that C0 (cid:18) C. We de(cid:12)ne a partial order on the set of all partitions
+by writing (cid:0)0 (cid:22)(cid:0) if (cid:0)0 is a re(cid:12)nement of (cid:0). Following the terminology of partially
+ordered sets, we say that a collection of partitions is an antichain if it does not
+contain two distinct partitions such that one is a re(cid:12)nement of the other.
+Forasetof n(cid:21)2points,the collectionofallpartitionsdoesnotformanantichain;
+thus, Theorem 2.1 follows from
+Theorem 3.1 Ifaclusteringfunctionf satis(cid:12)esScale-InvarianceandConsistency,
+then Range(f) is an antichain.
+Proof. For a partition (cid:0), we say that a distance function d (a;b)-conforms to (cid:0) if,
+for all pairs of points i;j that belong to the same cluster of (cid:0), we have d(i;j)(cid:20)a,
+whileforallpairsof pointsi;j that belong todi(cid:11)erentclusters,wehaved(i;j)(cid:21)b.
+With respect to a given clustering function f, we say that a pair of positive real
+numbers (a;b) is (cid:0)-forcing if, for all distance functions d that (a;b)-conform to (cid:0),
+we have f(d)=(cid:0).
+Let f be a clustering function that satis(cid:12)es Consistency. We claim that for any
+partition (cid:0)2Range(f), there exist positive real numbers a<b such that the pair
+(a;b) is (cid:0)-forcing. To see this, we (cid:12)rst note that since (cid:0)2Range(f), there exists a
+distancefunctiondsuchthatf(d)=(cid:0). Now,leta0 betheminimumdistanceamong
+pairsof pointsin the sameclusterof (cid:0), andlet b0 be the maximumdistanceamong
+pairs of points that do not belong to the same cluster of (cid:0). Choose numbers a<b
+so that a (cid:20)a0 and b (cid:21) b0. Clearly any distance function d0 that (a;b)-conforms to
+(cid:0) must be a (cid:0)-transformationof d, and so by the Consistency property, f(d0)=(cid:0).
+It follows that the pair (a;b) is (cid:0)-forcing.
+Now suppose further that the clustering function f satis(cid:12)es Scale-Invariance, and
+that there exist distinct partitions (cid:0) ;(cid:0) 2 Range(f) such that (cid:0) is a re(cid:12)nement
+0 1 0
+of (cid:0) . We show how this leads to a contradiction.
+1
+Let(a ;b ) bea(cid:0) -forcingpair,andlet(a ;b )be a(cid:0) -forcingpair,wherea <b
+0 0 0 1 1 1 0 0
+anda <b ;theexistenceofsuchpairsfollowsfromourclaimabove. Leta beany
+1 1 2
+number less than or equal to a , and choose " so that 0 < " < a a b(cid:0)1. It is now
+1 0 2 0
+straightforward to construct a distance function d with the following properties:
+Forpairsofpointsi;j thatbelongtothe sameclusterof(cid:0) ,wehaved(i;j)(cid:20)"; for
+0
+pairs i;j that belong to the same cluster of (cid:0) but not to the same cluster of (cid:0) ,
+1 0
+we have a (cid:20) d(i;j) (cid:20) a ; and for pairs i;j the do not belong to the same cluster
+2 1
+of (cid:0) , we have d(i;j)(cid:21)b .
+1 1
+--- Page 6 ---
+Thedistancefunctiond(a ;b )-conformsto(cid:0) ,andsowehavef(d)=(cid:0) . Nowset
+1 1 1 1
+(cid:11)=b a(cid:0)1,andde(cid:12)ned0 =(cid:11)(cid:1)d. ByScale-Invariance,wemusthavef(d0)=f(d)=
+0 2
+(cid:0) . But for points i;j in the same cluster of (cid:0) we have d0(i;j) (cid:20) "b a(cid:0)1 < a ,
+1 0 0 2 0
+while for points i;j that do not belong to the same cluster of (cid:0) we have d0(i;j)(cid:21)
+0
+a b a(cid:0)1 (cid:21)b . Thusd0 (a ;b )-conformsto(cid:0) , andsowemust havef(d0)=(cid:0) . As
+2 0 2 0 0 0 0 0
+(cid:0) 6=(cid:0) , this is a contradiction.
+0 1
+The proof above uses our assumption that the clustering function f is de(cid:12)ned on
+the set of all distance functions on n points. However, essentially the same proof
+yieldsacorrespondingimpossibilityresultforclusteringfunctionsf thatarede(cid:12)ned
+only on metrics, or only on distance functions arising from n points in a Euclidean
+space of some dimension. To adapt the proof, one need only be careful to choose
+the constant a and distance function d to satisfy the required properties.
+2
+We now prove a complementary positive result; together with Theorem 3.1, this
+completely characterizes the possible values of Range(f) for clustering functions f
+that satisfy Scale-Invarianceand Consistency.
+Theorem 3.2 For every antichain of partitions A, there is a clustering function f
+satisfying Scale-Invariance and Consistency for which Range(f)=A.
+Proof. Given an arbitrary antichain A, it is not clear how to produce a stopping
+condition for the single-linkage procedure that gives rise to a clustering function f
+with Range(f)=A. (Note that the k-clusterstoppingcondition yieldsaclustering
+function whoserangeisthe antichainconsistingof allpartitionsintok sets.) Thus,
+to prove this result, we use a variant of the sum-of-pairs clustering function (see
+e.g. [3]), adapted to general antichains. We focus on the case in which jAj > 1,
+since the case of jAj=1 is trivial.
+Forapartition(cid:0)2A,wewrite(i;j)(cid:24)(cid:0)ifbothiandjbelongtothesameclusterin
+(cid:0). TheA-sum-of-pairsfunctionf seeksthepartition(cid:0)2Athatminimizesthesum
+of all distances between pairs of points in the same cluster; in other words, it seeks
+the (cid:0) 2 A minimizing the objective function (cid:8) ((cid:0))= d(i;j): (Ties are
+d P(i;j)(cid:24)(cid:0)
+brokenlexicographically.) It iscrucialthat the minimizationisonlyoverpartitions
+in A; clearly, if we wished to minimize this objective function over all partitions,
+we would choose the partition in which each point forms its own cluster.
+Itisclearthatf satis(cid:12)esScale-Invariance,since(cid:8) (cid:11)(cid:1)d((cid:0))=(cid:11)(cid:8) d((cid:0))foranypartition
+(cid:0). By de(cid:12)nition we have Range(f) (cid:18) A, and we argue that Range(f) (cid:19) A as
+follows. Foranypartition(cid:0)2A, constructadistancefunctiondwith thefollowing
+properties: d(i;j) <n(cid:0)3 for every pair of points i;j belonging to the same cluster
+of (cid:0), and d(i;j) (cid:21) 1 for every pair of points i;j belonging to di(cid:11)erent clusters of
+(cid:0). We have (cid:8) ((cid:0)) < 1; and moreover (cid:8) ((cid:0)0) < 1 only for partitions (cid:0)0 that are
+d d
+re(cid:12)nements of (cid:0). Since A is an antichain, it follows that (cid:0) must minimize (cid:8) over
+d
+all partitions in A, and hence f(d)=(cid:0).
+It remains only to verify Consistency. Suppose that for the distance function d,
+we have f(d) = (cid:0); and let d0 be a (cid:0)-transformation of d. For any partition (cid:0)0, let
+(cid:1)((cid:0)0) = (cid:8) d((cid:0)0)(cid:0)(cid:8) d0((cid:0)0): It is enough to show that for any partition (cid:0)0 2 A, we
+have (cid:1)((cid:0))(cid:21)(cid:1)((cid:0)0):
+But this follows simply because (cid:1)((cid:0))= d(i;j)(cid:0)d0(i;j); while
+P(i;j)(cid:24)(cid:0)
+(cid:1)((cid:0)0 )= X d(i;j)(cid:0)d0 (i;j)(cid:20) X d(i;j)(cid:0)d0 (i;j)(cid:20)(cid:1)((cid:0));
+(i;j)(cid:24)(cid:0)0 (i;j)(cid:24)(cid:0)0 and (i;j)(cid:24)(cid:0)
+where both inequalities follow because d0 is a (cid:0)-transformation of d: (cid:12)rst, only
+--- Page 7 ---
+termscorrespondingtopairsinthe sameclusterof(cid:0)arenon-negative;andsecond,
+every term corresponding to a pair in the same cluster of (cid:0) is non-negative.
+4 Centroid-Based Clustering and Consistency
+Inawidely-usedapproachtoclustering,oneselectskoftheinputpointsascentroids,
+and then de(cid:12)nes clusters by assigning each point in S to its nearest centroid. The
+goal,intuitively,istochoosethecentroidssothateachpointinS isclosetoatleast
+one of them. This overall approach arises both from combinatorial optimization
+perspectives, where it has roots in facility location problems [9], and in maximum-
+likelihoodmethods,wherethecentroidsmayrepresentcentersofprobabilitydensity
+functions [4, 6]. We show here that for a fairly general class of centroid-based
+clustering functions, including k-means and k-median, none of the functions in the
+classsatis(cid:12)estheConsistencyproperty. Thissuggestsaninterestingtensionbetween
+between Consistency and the centroid-based approach to clustering, and forms a
+contrast with the results for single-linkage and sum-of-pairs in previous sections.
+Speci(cid:12)cally, for any natural number k (cid:21) 2, and any continuous, non-decreasing,
+and unbounded function g : R+ ! R+, we de(cid:12)ne the (k;g)-centroid clustering
+function as follows. First, we choose the set of k \centroid" points T (cid:18) S for
+whichtheobjectivefunction(cid:3)g(T)= g(d(i;T))isminimized. (Hered(i;T)=
+d Pi2S
+min j2T d(i;j).) Then we de(cid:12)ne a partition of S into k clusters by assigning each
+point to the element of T closest to it. The k-median function [9] is obtained
+by setting g to be the identity function, while the objective function underlying
+k-means clustering [4, 6] is obtained by setting g(d)=d2.
+Theorem 4.1 For every k (cid:21) 2 and every function g chosen as above, and for n
+su(cid:14)cientlylarge relative tok, the(k;g)-centroidclusteringfunctiondoes not satisfy
+the Consistency property.
+Proof Sketch. We describe the proof for k =2 clusters; the case of k >2 is similar.
+We consider a set of points S that is divided into two subsets: a set X consisting
+of m points, and a set Y consisting of (cid:13)m points, for a small number (cid:13) > 0. The
+distance between points in X is r, the distance between points in Y is " < r, and
+the distance from a point in X to a point in Y is r+(cid:14), for a small number (cid:14) >0.
+By choosing (cid:13), r, ", and (cid:14) appropriately, the optimal choice of k = 2 centroids
+will consist of one point from X and one from Y, and the resulting partition (cid:0) will
+have clusters X and Y. Now, suppose we divide X into sets X and X of equal
+0 1
+size, and reduce the distances between points in the same X to be r0 <r (keeping
+i
+all other distances the same). This can be done, for r0 small enough, so that the
+optimalchoiceof twocentroidswillnowconsistof onepointfromeachX ,yielding
+i
+a di(cid:11)erent partition of S. As our second distance function is a (cid:0)-transformationof
+the (cid:12)rst, this violates Consistency.
+5 Relaxing the Properties
+Inadditiontolookingforclusteringfunctionsthatsatisfysubsetsofthebasicprop-
+erties, we can also study the e(cid:11)ect of relaxing the properties themselves. Theo-
+rem 3.2 is a step in this direction, showing that the sum-of-pairs function satis(cid:12)es
+Scale-Invariance and Consistency, together with a relaxation of the Richness prop-
+erty. As an another example, it is interesting to note that single-linkage with the
+distance-r stopping condition satis(cid:12)es a natural relaxation of Scale-Invariance: if
+(cid:11)>1, then f((cid:11)(cid:1)d) is a re(cid:12)nement of f(d).
+--- Page 8 ---
+We now consider some relaxations of Consistency. Let f be a clustering function,
+anddadistancefunctionsuchthatf(d)=(cid:0). Ifwereducedistanceswithinclusters
+andexpanddistancesbetweenclusters,Consistencyrequiresthatf outputthesame
+partition (cid:0). But one could imagine requiring something less: perhaps changing
+distances this way should be allowed to create additional sub-structure, leading to
+anewpartitioninwhicheachclusterisasubsetofoneoftheoriginalclusters. Thus,
+we can de(cid:12)ne Re(cid:12)nement-Consistency, a relaxation of Consistency, to require that
+if d0 is an f(d)-transformation of d, then f(d0) should be a re(cid:12)nement of f(d).
+WecanshowthatthenaturalanalogueofTheorem2.1stillholds: thereisnocluster-
+ing function that satis(cid:12)es Scale-Invariance, Richness, and Re(cid:12)nement-Consistency.
+However, there is a crucial sense in which this result \just barely" holds, render-
+ing it arguably less interesting to us here. Speci(cid:12)cally, let (cid:0)(cid:3) denote the par-
+n
+tition of S = f1;2;:::;ng in which each individual element forms its own clus-
+ter. Then there exist clustering functions f that satisfy Scale-Invariance and
+Re(cid:12)nement-Consistency, and for which Range(f) consists of all partitions except
+(cid:0)(cid:3). (Oneexampleissingle-linkagewiththedistance-((cid:11)(cid:14))stoppingcondition,where
+n
+(cid:14) = min d(i;j) is the minimum inter-point distance, and (cid:11) (cid:21) 1.) Such func-
+i;j
+tions f, in addition to Scale-Invariance and Re(cid:12)nement-Consistency, thus satisfy a
+kind of Near-Richness property: one can obtain every partition as output except
+for a single, trivial partition. It is in this sense that our impossibility result for
+Re(cid:12)nement-Consistency, unlike Theorem 2.1, is quite \brittle."
+To relax Consistency even further, we could say simply that if d0 is an f(d)-
+transformation of d, then one of f(d) or f(d0) should be a re(cid:12)nement of the other.
+In other words, f(d0) may be either a re(cid:12)nement or a \coarsening" of f(d). It is
+possible to construct clustering functions f that satisfy this even weakervariant of
+Consistency, together with Scale-Invarianceand Richness.
+Acknowledgements. IthankShaiBen-David,JohnHopcroft,andLillianLeefor
+valuable discussions on this topic. This researchwas supported in part by a David
+and Lucile PackardFoundation Fellowship,an ONR YoungInvestigatorAward,an
+NSF Faculty Early Career Development Award, and NSF ITR Grant IIS-0081334.
+References
+[1] M. Anderberg, Cluster Analysis for Applications, Academic Press, 1973.
+[2] K.Arrow, Social Choice and Individual Values, Wiley, New York,1951.
+[3] M.Bern,D.Eppstein,\Approximationalgorithmsforgeometricprolems,"inApproxi-
+mationAlgorithmsforNP-HardProblems,(D.Hochbaum,Ed.),PWSPublishing,1996.
+[4] R.Duda,P. Hart, D. Stork,Pattern Classi(cid:12)cation (2ndedition), Wiley, 2001.
+[5] P.Hansen,F. Roberts,\Animpossibility result inaxiomatic location theory," Mathe-
+matics of Operations Research 21(1996).
+[6] A.Jain, R.Dubes, Algorithms for Clustering Data, Prentice-Hall, 1981.
+[7] N.Jardine, R.Sibson, Mathematical Taxonomy Wiley, 1971.
+[8] A.Kalai,C.Papadimitriou,S.Vempala,A.Vetta,personalcommunication,June2002.
+[9] P.Mirchandani, R.Francis, Discrete Location Theory, Wiley, 1990.
+[10] M. Osborne A.Rubinstein, A Course in Game Theory, MIT Press, 1994.
+[11] D.Pennock,E.Horvitz,C.L.Giles, \Social choicetheoryandrecommendersystems:
+Analysisoftheaxiomaticfoundationsofcollaborative(cid:12)ltering,"Proc.17thAAAI,2000.
+[12] J. Puzicha, T. Hofmann, J. Buhmann \A Theory of Proximity Based Clustering:
+StructureDetection byOptimization," Pattern Recognition, 33(2000).
