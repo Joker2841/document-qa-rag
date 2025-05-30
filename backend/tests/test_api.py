@@ -1,24 +1,15 @@
 import io
-import os
 import pytest
-from fastapi.testclient import TestClient
-
-from app.main import app
 from app.config import API_PREFIX
 
-@pytest.fixture(scope="module")
-def client():
-    return TestClient(app)
 
 def test_root_endpoint(client):
-    """Test the root endpoint."""
     response = client.get("/")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
 
 
 def test_upload_invalid_file_type(client):
-    """Test uploading a file with invalid extension."""
     file_content = b"Invalid file content"
     response = client.post(
         f"{API_PREFIX}/documents/upload",
@@ -29,8 +20,7 @@ def test_upload_invalid_file_type(client):
 
 
 def test_upload_txt_file(client):
-    """Test uploading a TXT file."""
-    file_content = b"This is a test document.\nIt has multiple lines.\nThis is for testing the upload functionality."
+    file_content = b"This is a test document.\nIt has multiple lines."
     response = client.post(
         f"{API_PREFIX}/documents/upload",
         files={"file": ("test.txt", io.BytesIO(file_content), "text/plain")}
@@ -44,15 +34,11 @@ def test_upload_txt_file(client):
 
 
 def test_list_documents(client):
-    """Test listing documents."""
-    # First upload a document
-    file_content = b"Another test document content."
+    file_content = b"List test content."
     client.post(
         f"{API_PREFIX}/documents/upload",
         files={"file": ("sample.txt", io.BytesIO(file_content), "text/plain")}
     )
-    
-    # Then get the list
     response = client.get(f"{API_PREFIX}/documents/")
     assert response.status_code == 200
     data = response.json()
@@ -63,16 +49,12 @@ def test_list_documents(client):
 
 
 def test_get_document(client):
-    """Test getting a specific document."""
-    # First upload a document
-    file_content = b"Content for retrieving specific document."
+    file_content = b"Get doc content."
     upload_response = client.post(
         f"{API_PREFIX}/documents/upload",
         files={"file": ("retrieve.txt", io.BytesIO(file_content), "text/plain")}
     )
     document_id = upload_response.json()["id"]
-    
-    # Then get it by ID
     response = client.get(f"{API_PREFIX}/documents/{document_id}")
     assert response.status_code == 200
     data = response.json()
@@ -81,20 +63,15 @@ def test_get_document(client):
 
 
 def test_delete_document(client):
-    """Test deleting a document."""
-    # First upload a document
-    file_content = b"Content for document to be deleted."
+    file_content = b"Delete doc content."
     upload_response = client.post(
         f"{API_PREFIX}/documents/upload",
         files={"file": ("delete_me.txt", io.BytesIO(file_content), "text/plain")}
     )
     document_id = upload_response.json()["id"]
-    
-    # Then delete it
     response = client.delete(f"{API_PREFIX}/documents/{document_id}")
     assert response.status_code == 200
     assert "Document deleted successfully" in response.json()["message"]
-    
-    # Try to get it - should return 404
+    # Confirm it's gone
     response = client.get(f"{API_PREFIX}/documents/{document_id}")
     assert response.status_code == 404
