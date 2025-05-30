@@ -51,12 +51,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest-cov
-    
-    - name: Clean data folders before tests
-      working-directory: ./backend
-      run: |
-        rm -f data/documents/*
-        rm -f data/processed/*
 
     - name: Create test directories
       working-directory: ./backend
