@@ -1,0 +1,4 @@
+This is a test document for the RAG system.
+It contains multiple lines of text.
+This will help us verify that document processing works correctly.
+The system should be able to extract this text and store it properly.

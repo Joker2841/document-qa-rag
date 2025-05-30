@@ -1,29 +1,26 @@
 import os
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union
-import tempfile
-from app.config import POPPLER_PATH
+from typing import Tuple, Union
+
 import pdfplumber
 import docx
 from bs4 import BeautifulSoup
 
-# Optional OCR imports - install with: pip install pytesseract Pillow pdf2image
+# Optional OCR imports
 try:
     import pytesseract
     from pdf2image import convert_from_path
-    from PIL import Image
     OCR_AVAILABLE = True
 except ImportError:
     OCR_AVAILABLE = False
-    print("OCR libraries not available. Install with: pip install pytesseract Pillow pdf2image")
 
-from app.config import PROCESSED_DIR
+from app.config import PROCESSED_DIR, POPPLER_PATH
 from app.utils.text_utils import clean_text
 
 
 class DocumentProcessor:
     """Service for extracting text from different document types."""
-    
+
     @staticmethod
     def extract_text_from_pdf(file_path: Path) -> str:
         """Extract text from PDF files with OCR fallback for image-based PDFs."""
@@ -99,7 +96,7 @@ class DocumentProcessor:
                 
         except Exception as e:
             raise Exception(f"OCR extraction failed: {str(e)}")
-    
+        
     @staticmethod
     def extract_text_from_docx(file_path: Path) -> str:
         """Extract text from DOCX files with enhanced content extraction."""
@@ -180,75 +177,51 @@ class DocumentProcessor:
         return DocumentProcessor.extract_text_from_txt(file_path)
     
     @classmethod
-    def process_document(cls, file_path: Union[str, Path]) -> Tuple[str, int]:
-        """
-        Process document based on file extension and extract text.
-        
-        Args:
-            file_path: Path to the uploaded document (string or Path object)
-            
-        Returns:
-            Tuple containing extracted text and character count
-        """
-        # Convert string to Path object if needed
+    def process_document(
+        cls, file_path: Union[str, Path]
+    ) -> Tuple[str, int]:
+        # Normalize to Path
         if isinstance(file_path, str):
             file_path = Path(file_path)
-        
-        # Check if file exists
+
+        # Existence & size checks
         if not file_path.exists():
             raise FileNotFoundError(f"File not found: {file_path}")
-        
-        # Check file size (limit to 50MB)
-        file_size = file_path.stat().st_size
-        if file_size > 50 * 1024 * 1024:  # 50MB
-            raise ValueError(f"File too large: {file_size / (1024*1024):.1f}MB. Maximum size is 50MB.")
-   
-        extension = file_path.suffix.lower()
-        
-        try:
-            if  extension == '.pdf':
-                text = cls.extract_text_from_pdf(file_path)
-            elif extension == '.docx':
-                text = cls.extract_text_from_docx(file_path)
-            elif extension == '.txt':
-                text = cls.extract_text_from_txt(file_path)
-            elif extension == '.html':
-                text = cls.extract_text_from_html(file_path)
-            elif extension == '.md':
-                text = cls.extract_text_from_markdown(file_path)
-            else:
-                raise ValueError(f"Unsupported file format: {extension}")
-            
-            # Ensure we have some text
-            if not text or not text.strip():
-                text = f"[{extension.upper()} document processed but no readable text found]"
-            
-            # Create PROCESSED_DIR if it doesn't exist
-            PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-            
-            # Save processed text
-            save_path = PROCESSED_DIR / f"{file_path.stem}_{file_path.suffix[1:]}.txt"
-            with open(save_path, 'w', encoding='utf-8') as f:
-                f.write(text)
-            print(f"[DocumentProcessor] Saved extracted text to → {save_path.resolve()}")
+        if file_path.stat().st_size > 50 * 1024 * 1024:
+            raise ValueError("File too large (>50 MB)")
 
-            return text, len(text)
-            
-        except Exception as e:
-            # Log the error but don't fail completely
-            error_message = f"Error processing {extension} file: {str(e)}"
-            print(error_message)  # For debugging
-            
-            # Return a minimal document instead of failing
-            fallback_text = f"[Document processing failed: {str(e)}]"
-            return fallback_text, len(fallback_text)
-    
+        ext = file_path.suffix.lower()
+        # Unsupported extension
+        if ext not in {".pdf", ".docx", ".txt", ".html", ".md"}:
+            raise ValueError(f"Unsupported file format: {ext}")
+
+        # Extract
+        try:
+            if ext == ".pdf":
+                text = cls.extract_text_from_pdf(file_path)
+            elif ext == ".docx":
+                text = cls.extract_text_from_docx(file_path)
+            elif ext == ".txt":
+                text = cls.extract_text_from_txt(file_path)
+            elif ext == ".html":
+                text = cls.extract_text_from_html(file_path)
+            else:
+                text = cls.extract_text_from_markdown(file_path)
+        except Exception:
+            # On any extraction error, produce empty text
+            text = ""
+
+        # Char count and saving
+        char_count = len(text)
+        PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+        out_name = f"{file_path.stem}_{ext[1:]}.txt"
+        save_path = PROCESSED_DIR / out_name
+        save_path.write_text(text, encoding="utf-8")
+
+        return text, char_count
+
     @staticmethod
     def is_valid_file(filename: str) -> bool:
-        """Check if the file has a supported extension."""
-        if not filename:
-            return False
-        
-        allowed_extensions = {'.pdf', '.docx', '.txt', '.html', '.md'}
-        file_path = Path(filename)
-        return file_path.suffix.lower() in allowed_extensions
+        return Path(filename).suffix.lower() in {
+            ".pdf", ".docx", ".txt", ".html", ".md"
+        }

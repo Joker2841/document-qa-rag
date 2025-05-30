@@ -2,26 +2,28 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+# Install system dependencies (poppler for PDF, tesseract for OCR)
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    poppler-utils \
+    tesseract-ocr \
+    libtesseract-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Copy and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --upgrade -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
 
-# Create necessary directories
+# Create persistent data directories
 RUN mkdir -p data/documents data/processed
 
-# Expose port
+# Expose FastAPI port
 EXPOSE 8000
 
-# Command to run the application
+# Start the application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

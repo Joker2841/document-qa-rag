@@ -40,6 +40,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
     
+    - name: Install system packages for OCR
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y poppler-utils tesseract-ocr
+            
     - name: Install dependencies
       working-directory: ./backend
       run: |
@@ -47,6 +52,12 @@ jobs:
         pip install -r requirements.txt
         pip install pytest-cov
     
+    - name: Clean data folders before tests
+      working-directory: ./backend
+      run: |
+        rm -f data/documents/*
+        rm -f data/processed/*
+
     - name: Create test directories
       working-directory: ./backend
       run: |

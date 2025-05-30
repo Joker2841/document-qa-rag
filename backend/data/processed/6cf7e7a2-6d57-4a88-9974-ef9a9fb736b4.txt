@@ -1,3 +1,0 @@
-This is a test document.
-It has multiple lines.
-This is for testing the upload functionality.

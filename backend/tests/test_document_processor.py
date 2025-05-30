@@ -139,8 +139,8 @@ def test_process_empty_document():
 
     try:
         text, char_count = DocumentProcessor.process_document(tmp_path)
-        assert char_count == 0
-        assert text == ""
+        assert text == "[Text file is empty]"
+        assert char_count == 20 
     finally:
         tmp_path.unlink()
 
